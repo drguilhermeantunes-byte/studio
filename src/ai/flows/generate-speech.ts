@@ -12,12 +12,12 @@ import { z } from 'genkit';
 import wav from 'wav';
 import { googleAI } from '@genkit-ai/google-genai';
 
-export const GenerateSpeechInputSchema = z.object({
+const GenerateSpeechInputSchema = z.object({
   text: z.string().describe('The text to be converted to speech.'),
 });
 export type GenerateSpeechInput = z.infer<typeof GenerateSpeechInputSchema>;
 
-export const GenerateSpeechOutputSchema = z.object({
+const GenerateSpeechOutputSchema = z.object({
   audio: z.string().describe('The base64 encoded WAV audio data URI.'),
 });
 export type GenerateSpeechOutput = z.infer<typeof GenerateSpeechOutputSchema>;
