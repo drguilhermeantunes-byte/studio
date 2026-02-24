@@ -1,63 +1,47 @@
 import Link from 'next/link';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Monitor, Users } from 'lucide-react';
 import { Logo } from '@/components/icons';
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 animated-gradient">
-      <Card className="w-full max-w-md shadow-2xl">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4">
-            <Logo className="h-16 w-16 text-primary" />
-          </div>
-          <CardTitle className="text-3xl font-bold text-primary">
-            UBS Taboão
-          </CardTitle>
-          <CardDescription className="text-lg">
+    <div className="flex min-h-screen w-full flex-col animated-gradient">
+      <header className="flex h-16 items-center px-4 container mx-auto">
+        <div className="flex items-center gap-2">
+          <Logo className="h-8 w-8 text-primary" />
+          <h1 className="text-xl font-bold text-foreground">
+            UBS São Roque
+          </h1>
+        </div>
+      </header>
+      <main className="flex flex-1 flex-col items-center justify-center text-center">
+        <div className="container mx-auto px-4">
+          <h2 className="text-4xl font-black tracking-tighter text-foreground md:text-6xl lg:text-7xl">
             Sistema de Chamada de Pacientes
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <p className="text-center text-muted-foreground">
-            Selecione a interface que deseja acessar:
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
+            Selecione a interface que deseja acessar para iniciar o atendimento ou visualizar as chamadas.
           </p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Button asChild size="lg" className="h-auto py-4">
-              <Link
-                href="/panel"
-                className="flex flex-col items-center justify-center gap-2"
-              >
-                <Users className="h-8 w-8" />
-                <span className="text-base font-semibold">Painel do Funcionário</span>
+          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <Button asChild size="lg" className="w-full sm:w-auto">
+              <Link href="/panel" className="flex items-center gap-2">
+                <Users />
+                <span>Painel do Funcionário</span>
               </Link>
             </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="secondary"
-              className="h-auto py-4"
-            >
-              <Link
-                href="/tv"
-                className="flex flex-col items-center justify-center gap-2"
-              >
-                <Monitor className="h-8 w-8" />
-                <span className="text-base font-semibold">Tela da TV</span>
+            <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
+              <Link href="/tv" className="flex items-center gap-2">
+                <Monitor />
+                <span>Tela da TV</span>
               </Link>
             </Button>
           </div>
-        </CardContent>
-      </Card>
-      <footer className="mt-8 text-center text-sm text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} AB Vitta. Todos os direitos reservados.</p>
+        </div>
+      </main>
+      <footer className="py-6 text-center text-sm text-muted-foreground">
+        <div className="container mx-auto">
+            <p>&copy; {new Date().getFullYear()} AB Vitta. Todos os direitos reservados.</p>
+        </div>
       </footer>
     </div>
   );

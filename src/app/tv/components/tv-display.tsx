@@ -145,7 +145,7 @@ export function TvDisplay() {
         <div className="flex w-full flex-col items-center justify-center text-center">
           {currentCall ? (
             <>
-              <h1 className="text-7xl font-black uppercase tracking-wider text-primary sm:text-8xl md:text-9xl lg:text-[10rem] xl:text-[12rem] leading-none">
+              <h1 className="text-7xl font-black uppercase tracking-wider text-foreground sm:text-8xl md:text-9xl lg:text-[10rem] xl:text-[12rem] leading-none">
                 {currentCall.patientName}
               </h1>
               <div className="mt-12 flex w-full flex-col items-center justify-center gap-4 text-foreground">
@@ -159,8 +159,8 @@ export function TvDisplay() {
                     Sala
                   </p>
                 </div>
-                <div className="mt-2 rounded-2xl border-4 border-primary bg-primary/10 px-12 py-2 md:px-16 md:py-4">
-                  <p className="font-mono text-8xl font-bold text-primary md:text-9xl">
+                <div className="mt-2 rounded-2xl bg-primary px-12 py-2 md:px-16 md:py-4">
+                  <p className="font-mono text-8xl font-bold text-primary-foreground md:text-9xl">
                     {currentCall.roomNumber}
                   </p>
                 </div>
@@ -179,7 +179,7 @@ export function TvDisplay() {
         <header className="flex items-center justify-between border-b-2 border-primary/50 pb-4">
           <div className="flex items-center gap-4">
             <Logo className="h-10 w-10 text-primary md:h-12 md:w-12" />
-            <h2 className="text-3xl font-bold text-primary md:text-4xl">UBS Taboão</h2>
+            <h2 className="text-3xl font-bold text-primary md:text-4xl">UBS São Roque</h2>
           </div>
           <Clock />
         </header>
@@ -193,7 +193,7 @@ export function TvDisplay() {
               callHistory.map((call) => (
                 <li
                   key={call.id}
-                  className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-lg bg-background p-3"
+                  className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-lg bg-secondary p-3"
                 >
                   <span className="text-xl font-semibold">{call.patientName}</span>
                   <span className="rounded-md bg-primary/20 px-3 py-1 text-base font-bold text-primary">
