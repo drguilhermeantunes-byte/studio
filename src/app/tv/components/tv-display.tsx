@@ -120,7 +120,7 @@ export function TvDisplay() {
   }
 
   return (
-    <div className="grid h-screen w-screen grid-cols-1 grid-rows-[auto_1fr] bg-background text-foreground md:grid-cols-[4fr_1fr] md:grid-rows-1">
+    <div className="grid h-screen w-screen grid-cols-1 grid-rows-[auto_1fr] bg-secondary text-foreground md:grid-cols-[4fr_1fr] md:grid-rows-1">
       {audioUrl && (
         <audio
           src={audioUrl}
@@ -141,11 +141,11 @@ export function TvDisplay() {
       )}
 
       {/* Main Call Section */}
-      <section className="flex flex-col items-center justify-center border-b-8 border-primary bg-background p-4 sm:p-8 md:border-b-0 md:border-r-8">
+      <section className="flex flex-col items-center justify-center border-b-8 border-primary/10 bg-background p-4 sm:p-8 md:border-b-0 md:border-r-8">
         <div className="flex w-full flex-col items-center justify-center text-center">
           {currentCall ? (
             <>
-              <h1 className="text-7xl font-black uppercase tracking-wider text-foreground sm:text-8xl md:text-9xl lg:text-[10rem] xl:text-[12rem] leading-none">
+              <h1 className="text-7xl font-black uppercase tracking-wider text-primary sm:text-8xl md:text-9xl lg:text-[10rem] xl:text-[12rem] leading-none">
                 {currentCall.patientName}
               </h1>
               <div className="mt-12 flex w-full flex-col items-center justify-center gap-4 text-foreground">
@@ -159,7 +159,7 @@ export function TvDisplay() {
                     Sala
                   </p>
                 </div>
-                <div className="mt-2 rounded-2xl bg-primary px-12 py-2 md:px-16 md:py-4">
+                <div className="mt-2 rounded-2xl bg-primary px-12 py-2 shadow-lg shadow-primary/20 md:px-16 md:py-4">
                   <p className="font-mono text-8xl font-bold text-primary-foreground md:text-9xl">
                     {currentCall.roomNumber}
                   </p>
@@ -175,8 +175,8 @@ export function TvDisplay() {
       </section>
 
       {/* Sidebar Section */}
-      <aside className="flex flex-col bg-card p-6">
-        <header className="flex items-center justify-between border-b-2 border-primary/50 pb-4">
+      <aside className="flex flex-col bg-background p-6">
+        <header className="flex items-center justify-between border-b-2 border-border pb-4">
           <div className="flex items-center gap-4">
             <Logo className="h-10 w-10 text-primary md:h-12 md:w-12" />
             <h2 className="text-3xl font-bold text-primary md:text-4xl">UBS São Roque</h2>
