@@ -1,9 +1,8 @@
 // This is a public configuration.
 export const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  projectId: 'studio-4912326057-b3b8b',
+  appId: '1:359393636122:web:9eea257a1d2812bc04c6a3',
+  apiKey: 'AIzaSyAeIiHCgwaJftrOORCKBLj6tejHRlLfifs',
+  authDomain: 'studio-4912326057-b3b8b.firebaseapp.com',
+  messagingSenderId: '359393636122',
 };
