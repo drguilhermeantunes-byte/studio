@@ -128,7 +128,7 @@ export function TvDisplay() {
               <h2 className="text-5xl font-semibold uppercase tracking-wider text-muted-foreground">
                 Paciente
               </h2>
-              <h1 className="mt-4 text-[10rem] font-black leading-none tracking-tight text-primary lg:text-[14rem]">
+              <h1 className="mt-4 text-[8rem] font-black leading-none tracking-tight text-primary lg:text-[10rem]">
                 {currentCall.patientName}
               </h1>
               <div className="mt-12 flex flex-col items-center justify-center gap-4 text-foreground">
