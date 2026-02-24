@@ -13,7 +13,7 @@ import { CallPatientForm } from './components/call-patient-form';
 
 export default function PanelPage() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4">
+    <main className="flex min-h-screen flex-col items-center justify-center p-4 animated-gradient">
       <div className="absolute left-4 top-4">
         <Button asChild variant="ghost">
           <Link href="/">

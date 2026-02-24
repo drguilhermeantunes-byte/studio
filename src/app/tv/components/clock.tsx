@@ -14,7 +14,7 @@ export function Clock() {
   }, []);
 
   return (
-    <div className="font-mono text-4xl font-bold text-foreground">
+    <div className="font-mono text-5xl font-bold text-foreground">
       {time.toLocaleTimeString('pt-BR', {
         hour: '2-digit',
         minute: '2-digit',
