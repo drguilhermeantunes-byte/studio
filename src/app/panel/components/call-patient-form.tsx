@@ -35,15 +35,15 @@ const formSchema = z.object({
   professionalName: z.string({
     required_error: 'Por favor, selecione um profissional.',
   }),
-  roomNumber: z.string().min(1, {
-    message: 'O número da sala é obrigatório.',
+  roomNumber: z.string({
+    required_error: 'Por favor, selecione uma sala.',
   }),
 });
 
 const professionals = [
   {
-    role: 'ACS',
-    names: ['Alessandra', 'Laudeli', 'Diogo', 'Bruno', 'Gabriela', 'Jackeline'],
+    role: 'Médicos',
+    names: ['Guilherme', 'Bruna', 'Maria Jose'],
   },
   {
     role: 'Enfermeiros',
@@ -54,9 +54,22 @@ const professionals = [
     names: ['Eva', 'Vera Lucia', 'Thiago', 'Sarah'],
   },
   {
-    role: 'Médicos',
-    names: ['Guilherme', 'Bruna', 'Maria Jose'],
+    role: 'ACS',
+    names: ['Alessandra', 'Laudeli', 'Diogo', 'Bruno', 'Gabriela', 'Jackeline'],
   },
+];
+
+const rooms = [
+  'Consultório',
+  'Exames',
+  'Vacinação',
+  'Pós-consulta',
+  'Recepção',
+  'Farmácia',
+  'Medicação',
+  'Ginecologia',
+  'Telemedicina',
+  '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'
 ];
 
 export function CallPatientForm() {
@@ -67,7 +80,7 @@ export function CallPatientForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       patientName: '',
-      roomNumber: '',
+      roomNumber: undefined,
       professionalName: undefined,
     },
   });
@@ -154,9 +167,20 @@ export function CallPatientForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Sala</FormLabel>
-              <FormControl>
-                <Input placeholder="Ex: 7" {...field} />
-              </FormControl>
+               <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a sala" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                    {rooms.map((room) => (
+                        <SelectItem key={room} value={room}>
+                          {room.startsWith('P') ? 'Pós-consulta' : room}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
