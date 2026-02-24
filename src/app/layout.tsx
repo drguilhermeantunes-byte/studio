@@ -7,7 +7,7 @@ import { Toaster } from '@/components/ui/toaster';
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: 'ChamaUBS - Sistema de Chamada de Pacientes',
+  title: 'UBS Taboão - Sistema de Chamada de Pacientes',
   description:
     'Sistema de chamada de pacientes em tempo real para Unidades Básicas de Saúde.',
 };

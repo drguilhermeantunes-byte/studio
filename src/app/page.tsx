@@ -19,7 +19,7 @@ export default function Home() {
             <Logo className="h-16 w-16 text-primary" />
           </div>
           <CardTitle className="text-3xl font-bold text-primary">
-            ChamaUBS
+            UBS Taboão
           </CardTitle>
           <CardDescription className="text-lg">
             Sistema de Chamada de Pacientes
@@ -57,7 +57,7 @@ export default function Home() {
         </CardContent>
       </Card>
       <footer className="mt-8 text-center text-sm text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} ChamaUBS. Todos os direitos reservados.</p>
+        <p>&copy; {new Date().getFullYear()} AB Vitta. Todos os direitos reservados.</p>
       </footer>
     </div>
   );

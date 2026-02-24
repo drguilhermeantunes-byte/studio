@@ -71,7 +71,7 @@ export function CallPatientForm() {
             <FormItem>
               <FormLabel>Nome do Paciente</FormLabel>
               <FormControl>
-                <Input placeholder="Ex: João da Silva" {...field} />
+                <Input placeholder="Ex: Maria Aparecida A." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -84,7 +84,7 @@ export function CallPatientForm() {
             <FormItem>
               <FormLabel>Sala</FormLabel>
               <FormControl>
-                <Input placeholder="Ex: 5" {...field} />
+                <Input placeholder="Ex: 7" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -11,6 +11,7 @@ import {
 } from 'firebase/firestore';
 import type { Call } from '@/lib/types';
 import { dynamicPatientAnnouncement } from '@/ai/flows/dynamic-patient-announcement';
+import { generateSpeech } from '@/ai/flows/generate-speech';
 import { Clock } from './clock';
 import { Logo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
@@ -25,7 +26,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { RotateCcw, Volume2, Play } from 'lucide-react';
+import { RotateCcw, Volume2, Play, Loader2 } from 'lucide-react';
 import { resetHistory } from '@/app/panel/actions';
 import { useToast } from '@/hooks/use-toast';
 
@@ -34,6 +35,8 @@ export function TvDisplay() {
   const [callHistory, setCallHistory] = useState<Call[]>([]);
   const [lastAnnouncedId, setLastAnnouncedId] = useState<string | null>(null);
   const [isStarted, setIsStarted] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [isAnnouncing, setIsAnnouncing] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -62,30 +65,25 @@ export function TvDisplay() {
   useEffect(() => {
     const announceCall = async () => {
       if (currentCall && currentCall.id !== lastAnnouncedId) {
+        setIsAnnouncing(true);
+        setLastAnnouncedId(currentCall.id);
         try {
           const { announcementText } = await dynamicPatientAnnouncement({
             patientName: currentCall.patientName,
             roomNumber: currentCall.roomNumber,
           });
 
-          const utterance = new SpeechSynthesisUtterance(announcementText);
-          utterance.lang = 'pt-BR';
-          utterance.volume = 1;
-          utterance.rate = 1;
+          const { audio } = await generateSpeech({ text: announcementText });
 
-          // Try to find a female Portuguese voice
-          const voices = window.speechSynthesis.getVoices();
-          const femaleVoice = voices.find(
-            (voice) => voice.lang === 'pt-BR' && voice.name.includes('Feminino')
-          );
-          if (femaleVoice) {
-            utterance.voice = femaleVoice;
-          }
-
-          window.speechSynthesis.speak(utterance);
-          setLastAnnouncedId(currentCall.id);
+          setAudioUrl(audio);
         } catch (error) {
           console.error("Failed to generate or speak announcement:", error);
+          toast({
+            title: 'Erro de Áudio',
+            description: 'Não foi possível gerar o anúncio por voz.',
+            variant: 'destructive',
+          });
+          setIsAnnouncing(false);
         }
       }
     };
@@ -93,7 +91,7 @@ export function TvDisplay() {
     if (isStarted) {
       announceCall();
     }
-  }, [currentCall, lastAnnouncedId, isStarted]);
+  }, [currentCall, lastAnnouncedId, isStarted, toast]);
 
   const handleResetHistory = async () => {
     const result = await resetHistory();
@@ -123,6 +121,25 @@ export function TvDisplay() {
 
   return (
     <div className="grid h-screen w-screen grid-cols-1 grid-rows-[auto_1fr] bg-background text-foreground md:grid-cols-[3fr_1fr] md:grid-rows-1">
+      {audioUrl && (
+        <audio
+          src={audioUrl}
+          autoPlay
+          onEnded={() => {
+            setAudioUrl(null);
+            setIsAnnouncing(false);
+          }}
+          onError={() => {
+            setIsAnnouncing(false);
+             toast({
+              title: 'Erro de Áudio',
+              description: 'Falha ao reproduzir o som.',
+              variant: 'destructive',
+            });
+          }}
+        />
+      )}
+
       {/* Main Call Section */}
       <section className="flex flex-col items-center justify-center border-b-4 border-primary bg-card p-8 md:border-b-0 md:border-r-4">
         <div className="flex w-full flex-col items-center justify-center text-center">
@@ -132,7 +149,11 @@ export function TvDisplay() {
                 {currentCall.patientName}
               </p>
               <div className="mt-8 flex items-center gap-4 text-5xl font-medium text-foreground lg:text-6xl">
-                <Volume2 className="h-16 w-16 text-accent" />
+                {isAnnouncing ? (
+                  <Loader2 className="h-16 w-16 animate-spin text-accent" />
+                ) : (
+                  <Volume2 className="h-16 w-16 text-accent" />
+                )}
                 <span>Dirija-se à sala</span>
                 <span className="rounded-xl bg-accent px-6 py-2 font-bold text-accent-foreground">
                   {currentCall.roomNumber}
@@ -152,7 +173,7 @@ export function TvDisplay() {
         <header className="flex items-center justify-between border-b pb-4">
           <div className="flex items-center gap-3">
             <Logo className="h-10 w-10 text-primary" />
-            <h2 className="text-2xl font-bold text-primary">ChamaUBS</h2>
+            <h2 className="text-2xl font-bold text-primary">UBS Taboão</h2>
           </div>
           <Clock />
         </header>
