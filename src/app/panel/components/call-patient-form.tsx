@@ -14,9 +14,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { callPatient } from '../actions';
 import { BellRing, Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { useFirestore } from '@/firebase';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 
 const formSchema = z.object({
   patientName: z.string().min(3, {
@@ -30,6 +31,7 @@ const formSchema = z.object({
 export function CallPatientForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const firestore = useFirestore();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -40,24 +42,31 @@ export function CallPatientForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
-    const result = await callPatient(values);
-    setIsSubmitting(false);
+    try {
+      const callsCollection = collection(firestore, 'calls');
+      await addDoc(callsCollection, {
+        patientName: values.patientName,
+        roomNumber: values.roomNumber,
+        timestamp: serverTimestamp(),
+      });
 
-    if (result.success) {
       toast({
         title: 'Sucesso!',
         description: `Paciente ${values.patientName} chamado para a sala ${values.roomNumber}.`,
         variant: 'default',
       });
       form.reset();
-      // Set focus back to the patient name field
       form.setFocus('patientName');
-    } else {
+    } catch (error) {
+      console.error('Error adding document: ', error);
       toast({
         title: 'Erro!',
-        description: result.error || 'Não foi possível realizar a chamada.',
+        description:
+          'Não foi possível realizar a chamada. Verifique sua conexão com a internet.',
         variant: 'destructive',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   }
 

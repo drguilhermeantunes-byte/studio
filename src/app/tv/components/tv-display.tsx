@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { db } from '@/lib/firebase';
+import { useState, useEffect, useMemo } from 'react';
+import { useFirestore, useCollection } from '@/firebase';
 import {
   collection,
   query,
   orderBy,
-  onSnapshot,
   limit,
+  getDocs,
+  writeBatch,
 } from 'firebase/firestore';
 import type { Call } from '@/lib/types';
 import { dynamicPatientAnnouncement } from '@/ai/flows/dynamic-patient-announcement';
@@ -26,41 +27,29 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { RotateCcw, Volume2, Play, Loader2 } from 'lucide-react';
-import { resetHistory } from '@/app/panel/actions';
+import { RotateCcw, Volume2, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export function TvDisplay() {
-  const [currentCall, setCurrentCall] = useState<Call | null>(null);
-  const [callHistory, setCallHistory] = useState<Call[]>([]);
   const [lastAnnouncedId, setLastAnnouncedId] = useState<string | null>(null);
-  const [isStarted, setIsStarted] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isAnnouncing, setIsAnnouncing] = useState(false);
   const { toast } = useToast();
+  const firestore = useFirestore();
 
-  useEffect(() => {
-    if (!isStarted) return;
-
-    const q = query(
-      collection(db, 'calls'),
+  const callsQuery = useMemo(() => {
+    if (!firestore) return null;
+    return query(
+      collection(firestore, 'calls'),
       orderBy('timestamp', 'desc'),
       limit(6)
     );
+  }, [firestore]);
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const calls: Call[] = [];
-      querySnapshot.forEach((doc) => {
-        calls.push({ id: doc.id, ...doc.data() } as Call);
-      });
+  const { data: calls } = useCollection<Call>(callsQuery);
 
-      const newCurrentCall = calls.length > 0 ? calls[0] : null;
-      setCurrentCall(newCurrentCall);
-      setCallHistory(calls.length > 1 ? calls.slice(1) : []);
-    });
-
-    return () => unsubscribe();
-  }, [isStarted]);
+  const currentCall = calls && calls.length > 0 ? calls[0] : null;
+  const callHistory = calls && calls.length > 1 ? calls.slice(1) : [];
 
   useEffect(() => {
     const announceCall = async () => {
@@ -77,7 +66,7 @@ export function TvDisplay() {
 
           setAudioUrl(audio);
         } catch (error) {
-          console.error("Failed to generate or speak announcement:", error);
+          console.error('Failed to generate or speak announcement:', error);
           toast({
             title: 'Erro de Áudio',
             description: 'Não foi possível gerar o anúncio por voz.',
@@ -88,39 +77,45 @@ export function TvDisplay() {
       }
     };
 
-    if (isStarted) {
-      announceCall();
-    }
-  }, [currentCall, lastAnnouncedId, isStarted, toast]);
+    announceCall();
+  }, [currentCall, lastAnnouncedId, toast]);
 
   const handleResetHistory = async () => {
-    const result = await resetHistory();
-    if (result.success) {
+    try {
+      if (!firestore) return;
+      const callsCollection = collection(firestore, 'calls');
+      const callsSnapshot = await getDocs(callsCollection);
+
+      if (callsSnapshot.empty) {
+        toast({
+          title: 'Aviso',
+          description: 'O histórico já estava vazio.',
+        });
+        return;
+      }
+
+      const batch = writeBatch(firestore);
+      callsSnapshot.docs.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+
+      await batch.commit();
       toast({
         title: 'Sucesso',
-        description: result.success,
+        description: 'Histórico de chamadas resetado com sucesso!',
       });
-    } else {
+    } catch (error) {
+      console.error('Error resetting history: ', error);
       toast({
         title: 'Erro',
-        description: result.error,
+        description: 'Não foi possível resetar o histórico.',
         variant: 'destructive',
       });
     }
   };
 
-  if (!isStarted) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-background">
-        <Button size="lg" className="h-20 text-2xl" onClick={() => setIsStarted(true)}>
-          <Play className="mr-4 h-8 w-8" /> Iniciar Display
-        </Button>
-      </div>
-    );
-  }
-
   return (
-    <div className="grid h-screen w-screen grid-cols-1 grid-rows-[auto_1fr] bg-secondary text-foreground md:grid-cols-[4fr_1fr] md:grid-rows-1">
+    <div className="grid h-screen w-screen grid-rows-1 bg-background text-foreground lg:grid-cols-[1fr_400px]">
       {audioUrl && (
         <audio
           src={audioUrl}
@@ -131,7 +126,7 @@ export function TvDisplay() {
           }}
           onError={() => {
             setIsAnnouncing(false);
-             toast({
+            toast({
               title: 'Erro de Áudio',
               description: 'Falha ao reproduzir o som.',
               variant: 'destructive',
@@ -141,33 +136,34 @@ export function TvDisplay() {
       )}
 
       {/* Main Call Section */}
-      <section className="flex flex-col items-center justify-center border-b-8 border-primary/10 bg-background p-4 sm:p-8 md:border-b-0 md:border-r-8">
+      <section className="flex flex-col items-center justify-center p-8">
         <div className="flex w-full flex-col items-center justify-center text-center">
           {currentCall ? (
             <>
-              <h1 className="text-7xl font-black uppercase tracking-wider text-primary sm:text-8xl md:text-9xl lg:text-[10rem] xl:text-[12rem] leading-none">
+              <h2 className="text-5xl font-semibold uppercase tracking-wider text-muted-foreground">
+                Paciente
+              </h2>
+              <h1 className="mt-4 text-[10rem] font-black leading-none tracking-tight text-primary lg:text-[14rem]">
                 {currentCall.patientName}
               </h1>
-              <div className="mt-12 flex w-full flex-col items-center justify-center gap-4 text-foreground">
+              <div className="mt-12 flex flex-col items-center justify-center gap-4 text-foreground">
                 <div className="flex items-center gap-4">
                   {isAnnouncing ? (
                     <Loader2 className="h-12 w-12 animate-spin text-primary" />
                   ) : (
                     <Volume2 className="h-12 w-12 text-primary" />
                   )}
-                  <p className="text-5xl font-bold uppercase md:text-6xl">
-                    Sala
-                  </p>
+                  <p className="text-6xl font-bold uppercase">Sala</p>
                 </div>
-                <div className="mt-2 rounded-2xl bg-primary px-12 py-2 shadow-lg shadow-primary/20 md:px-16 md:py-4">
-                  <p className="font-mono text-8xl font-bold text-primary-foreground md:text-9xl">
+                <div className="mt-2 rounded-2xl bg-primary px-16 py-4 shadow-lg">
+                  <p className="font-mono text-9xl font-bold text-primary-foreground">
                     {currentCall.roomNumber}
                   </p>
                 </div>
               </div>
             </>
           ) : (
-            <div className="text-center text-4xl font-medium text-muted-foreground md:text-6xl">
+            <div className="text-center text-5xl font-semibold text-muted-foreground">
               Aguardando chamada...
             </div>
           )}
@@ -175,11 +171,11 @@ export function TvDisplay() {
       </section>
 
       {/* Sidebar Section */}
-      <aside className="flex flex-col bg-background p-6">
+      <aside className="hidden flex-col border-l-2 border-border/50 bg-secondary/40 p-6 lg:flex">
         <header className="flex items-center justify-between border-b-2 border-border pb-4">
           <div className="flex items-center gap-4">
-            <Logo className="h-10 w-10 text-primary md:h-12 md:w-12" />
-            <h2 className="text-3xl font-bold text-primary md:text-4xl">UBS São Roque</h2>
+            <Logo className="h-12 w-12 text-primary" />
+            <h2 className="text-4xl font-bold text-primary">UBS São Roque</h2>
           </div>
           <Clock />
         </header>
@@ -193,20 +189,24 @@ export function TvDisplay() {
               callHistory.map((call) => (
                 <li
                   key={call.id}
-                  className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-lg bg-secondary p-3"
+                  className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-lg bg-background p-3 shadow-sm"
                 >
-                  <span className="text-xl font-semibold">{call.patientName}</span>
+                  <span className="text-xl font-semibold">
+                    {call.patientName}
+                  </span>
                   <span className="rounded-md bg-primary/20 px-3 py-1 text-base font-bold text-primary">
                     SALA {call.roomNumber}
                   </span>
                 </li>
               ))
             ) : (
-              <p className="text-base text-muted-foreground">Nenhuma chamada no histórico.</p>
+              <p className="text-base text-muted-foreground">
+                Nenhuma chamada no histórico.
+              </p>
             )}
           </ul>
         </div>
-        
+
         <footer className="mt-6">
           <AlertDialog>
             <AlertDialogTrigger asChild>
