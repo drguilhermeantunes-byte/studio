@@ -13,13 +13,17 @@
           "type": "string",
           "description": "The room number."
         },
+        "professionalName": {
+          "type": "string",
+          "description": "The name of the health professional."
+        },
         "timestamp": {
           "type": "string",
           "format": "date-time",
           "description": "The time of the call."
         }
       },
-      "required": ["patientName", "roomNumber", "timestamp"]
+      "required": ["patientName", "roomNumber", "timestamp", "professionalName"]
     }
   },
   "auth": {

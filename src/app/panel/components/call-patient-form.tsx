@@ -11,6 +11,15 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -23,10 +32,32 @@ const formSchema = z.object({
   patientName: z.string().min(3, {
     message: 'O nome do paciente deve ter pelo menos 3 caracteres.',
   }),
+  professionalName: z.string({
+    required_error: 'Por favor, selecione um profissional.',
+  }),
   roomNumber: z.string().min(1, {
     message: 'O número da sala é obrigatório.',
   }),
 });
+
+const professionals = [
+  {
+    role: 'ACS',
+    names: ['Alessandra', 'Laudeli', 'Diogo', 'Bruno', 'Gabriela', 'Jackeline'],
+  },
+  {
+    role: 'Enfermeiros',
+    names: ['Karoline', 'Jason'],
+  },
+  {
+    role: 'Técnicos de Enfermagem',
+    names: ['Eva', 'Vera Lucia', 'Thiago', 'Sarah'],
+  },
+  {
+    role: 'Médicos',
+    names: ['Guilherme', 'Bruna', 'Maria Jose'],
+  },
+];
 
 export function CallPatientForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,6 +68,7 @@ export function CallPatientForm() {
     defaultValues: {
       patientName: '',
       roomNumber: '',
+      professionalName: undefined,
     },
   });
 
@@ -47,6 +79,7 @@ export function CallPatientForm() {
       await addDoc(callsCollection, {
         patientName: values.patientName,
         roomNumber: values.roomNumber,
+        professionalName: values.professionalName,
         timestamp: serverTimestamp(),
       });
 
@@ -82,6 +115,35 @@ export function CallPatientForm() {
               <FormControl>
                 <Input placeholder="Ex: Maria Aparecida A." {...field} />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="professionalName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Profissional</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o profissional" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {professionals.map((group) => (
+                    <SelectGroup key={group.role}>
+                      <SelectLabel>{group.role}</SelectLabel>
+                      {group.names.map((name) => (
+                        <SelectItem key={name} value={name}>
+                          {name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

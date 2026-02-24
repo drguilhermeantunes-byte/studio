@@ -56,7 +56,7 @@ export function TvDisplay() {
     if (currentCall && currentCall.id !== lastAnnouncedId) {
       setLastAnnouncedId(currentCall.id);
 
-      const announcementText = `Olá, ${currentCall.patientName}, por favor, dirija-se à sala ${currentCall.roomNumber}. Obrigada.`;
+      const announcementText = `Olá, ${currentCall.patientName}, atendimento com ${currentCall.professionalName} na sala ${currentCall.roomNumber}.`;
 
       try {
         const utterance = new SpeechSynthesisUtterance(announcementText);
@@ -131,6 +131,9 @@ export function TvDisplay() {
               <h1 className="mt-4 text-[8rem] font-black leading-none tracking-tight text-primary lg:text-[10rem]">
                 {currentCall.patientName}
               </h1>
+              <p className="mt-6 text-4xl font-medium text-foreground lg:text-5xl">
+                {currentCall.professionalName}
+              </p>
               <div className="mt-12 flex flex-col items-center justify-center gap-4 text-foreground">
                 <div className="flex items-center gap-4">
                   {isSpeaking ? (
@@ -174,12 +177,15 @@ export function TvDisplay() {
               callHistory.map((call) => (
                 <li
                   key={call.id}
-                  className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-lg bg-background p-3 shadow-sm"
+                  className="flex items-center justify-between gap-x-4 rounded-lg bg-background p-3 shadow-sm"
                 >
-                  <span className="text-xl font-semibold">
-                    {call.patientName}
-                  </span>
-                  <span className="rounded-md bg-primary/20 px-3 py-1 text-base font-bold text-primary">
+                  <div className="flex-grow">
+                    <p className="text-xl font-semibold">{call.patientName}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {call.professionalName}
+                    </p>
+                  </div>
+                  <span className="flex-shrink-0 rounded-md bg-primary/20 px-3 py-1 text-base font-bold text-primary">
                     SALA {call.roomNumber}
                   </span>
                 </li>
