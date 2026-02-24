@@ -11,8 +11,6 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import type { Call } from '@/lib/types';
-import { dynamicPatientAnnouncement } from '@/ai/flows/dynamic-patient-announcement';
-import { generateSpeech } from '@/ai/flows/generate-speech';
 import { Clock } from './clock';
 import { Logo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
@@ -32,8 +30,7 @@ import { useToast } from '@/hooks/use-toast';
 
 export function TvDisplay() {
   const [lastAnnouncedId, setLastAnnouncedId] = useState<string | null>(null);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [isAnnouncing, setIsAnnouncing] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const { toast } = useToast();
   const firestore = useFirestore();
 
@@ -52,32 +49,39 @@ export function TvDisplay() {
   const callHistory = calls && calls.length > 1 ? calls.slice(1) : [];
 
   useEffect(() => {
-    const announceCall = async () => {
-      if (currentCall && currentCall.id !== lastAnnouncedId) {
-        setIsAnnouncing(true);
-        setLastAnnouncedId(currentCall.id);
-        try {
-          const { announcementText } = await dynamicPatientAnnouncement({
-            patientName: currentCall.patientName,
-            roomNumber: currentCall.roomNumber,
-          });
+    if (typeof window === 'undefined' || !window.speechSynthesis) {
+      return;
+    }
 
-          const { audio } = await generateSpeech({ text: announcementText });
+    if (currentCall && currentCall.id !== lastAnnouncedId) {
+      setLastAnnouncedId(currentCall.id);
 
-          setAudioUrl(audio);
-        } catch (error) {
-          console.error('Failed to generate or speak announcement:', error);
+      const announcementText = `Olá, ${currentCall.patientName}, por favor, dirija-se à sala ${currentCall.roomNumber}. Obrigada.`;
+
+      try {
+        const utterance = new SpeechSynthesisUtterance(announcementText);
+        utterance.lang = 'pt-BR';
+        utterance.onstart = () => setIsSpeaking(true);
+        utterance.onend = () => setIsSpeaking(false);
+        utterance.onerror = () => {
+          setIsSpeaking(false);
           toast({
             title: 'Erro de Áudio',
-            description: 'Não foi possível gerar o anúncio por voz.',
+            description: 'Não foi possível reproduzir o anúncio por voz.',
             variant: 'destructive',
           });
-          setIsAnnouncing(false);
-        }
+        };
+        window.speechSynthesis.speak(utterance);
+      } catch (error) {
+        console.error('Speech synthesis failed:', error);
+        setIsSpeaking(false);
+        toast({
+          title: 'Erro de Áudio',
+          description: 'Não foi possível gerar o anúncio por voz.',
+          variant: 'destructive',
+        });
       }
-    };
-
-    announceCall();
+    }
   }, [currentCall, lastAnnouncedId, toast]);
 
   const handleResetHistory = async () => {
@@ -116,25 +120,6 @@ export function TvDisplay() {
 
   return (
     <div className="grid h-screen w-screen grid-rows-1 bg-background text-foreground lg:grid-cols-[1fr_400px]">
-      {audioUrl && (
-        <audio
-          src={audioUrl}
-          autoPlay
-          onEnded={() => {
-            setAudioUrl(null);
-            setIsAnnouncing(false);
-          }}
-          onError={() => {
-            setIsAnnouncing(false);
-            toast({
-              title: 'Erro de Áudio',
-              description: 'Falha ao reproduzir o som.',
-              variant: 'destructive',
-            });
-          }}
-        />
-      )}
-
       {/* Main Call Section */}
       <section className="flex flex-col items-center justify-center p-8">
         <div className="flex w-full flex-col items-center justify-center text-center">
@@ -148,7 +133,7 @@ export function TvDisplay() {
               </h1>
               <div className="mt-12 flex flex-col items-center justify-center gap-4 text-foreground">
                 <div className="flex items-center gap-4">
-                  {isAnnouncing ? (
+                  {isSpeaking ? (
                     <Loader2 className="h-12 w-12 animate-spin text-primary" />
                   ) : (
                     <Volume2 className="h-12 w-12 text-primary" />
