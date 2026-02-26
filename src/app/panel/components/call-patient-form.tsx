@@ -182,8 +182,8 @@ export function CallPatientForm() {
                   {professionals.map((group) => (
                     <SelectGroup key={group.role}>
                       <SelectLabel>{group.role}</SelectLabel>
-                      {group.names.map((name) => (
-                        <SelectItem key={name} value={name}>
+                      {group.names.map((name, index) => (
+                        <SelectItem key={`${group.role}-${name}-${index}`} value={name}>
                           {name}
                         </SelectItem>
                       ))}
