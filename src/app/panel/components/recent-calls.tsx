@@ -4,20 +4,22 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Call } from "@/lib/types";
-import { Repeat } from "lucide-react";
+import { Repeat, Trash2 } from "lucide-react";
+import { format } from 'date-fns';
 
 interface RecentCallsProps {
     calls: Call[] | null;
     loading: boolean;
     onCallSelect: (call: Call) => void;
+    onDeleteCall: (call: Call) => void;
 }
 
-export function RecentCalls({ calls, loading, onCallSelect }: RecentCallsProps) {
+export function RecentCalls({ calls, loading, onCallSelect, onDeleteCall }: RecentCallsProps) {
     if (loading) {
         return (
             <div className="space-y-4">
                 {[...Array(5)].map((_, i) => (
-                    <Skeleton key={i} className="h-16 w-full" />
+                    <Skeleton key={i} className="h-20 w-full" />
                 ))}
             </div>
         );
@@ -42,17 +44,32 @@ export function RecentCalls({ calls, loading, onCallSelect }: RecentCallsProps) 
                                 Sala {call.roomNumber}
                                 {call.professionalName && ` - ${call.professionalName}`}
                             </p>
+                            <p className="text-xs text-muted-foreground">
+                                {call.timestamp ? format(call.timestamp.toDate(), 'HH:mm:ss') : ''}
+                            </p>
                         </div>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="flex-shrink-0"
-                            onClick={() => onCallSelect(call)}
-                            aria-label={`Re-chamar ${call.patientName}`}
-                            title={`Re-chamar ${call.patientName}`}
-                        >
-                            <Repeat className="h-5 w-5" />
-                        </Button>
+                        <div className="flex flex-shrink-0 items-center">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="flex-shrink-0"
+                                onClick={() => onCallSelect(call)}
+                                aria-label={`Re-chamar ${call.patientName}`}
+                                title={`Re-chamar ${call.patientName}`}
+                            >
+                                <Repeat className="h-5 w-5" />
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="flex-shrink-0 text-destructive hover:text-destructive"
+                                onClick={() => onDeleteCall(call)}
+                                aria-label={`Deletar chamada de ${call.patientName}`}
+                                title={`Deletar chamada de ${call.patientName}`}
+                            >
+                                <Trash2 className="h-5 w-5" />
+                            </Button>
+                        </div>
                     </div>
                 ))}
             </div>

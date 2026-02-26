@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { RotateCcw, Volume2, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
 
 export function TvDisplay() {
   const [lastAnnouncedId, setLastAnnouncedId] = useState<string | null>(null);
@@ -166,7 +167,7 @@ export function TvDisplay() {
               <h2 className="text-4xl font-semibold uppercase tracking-wider text-muted-foreground md:text-5xl">
                 Paciente
               </h2>
-              <h1 className="mt-4 text-7xl font-black leading-none tracking-tight text-primary md:text-8xl lg:text-9xl">
+              <h1 className="mt-4 text-6xl font-black leading-none tracking-tight text-primary md:text-7xl lg:text-8xl">
                 {currentCall.patientName}
               </h1>
                {currentCall.professionalName && (
@@ -188,6 +189,9 @@ export function TvDisplay() {
                     {currentCall.roomNumber}
                   </p>
                 </div>
+                <p className="mt-4 text-2xl text-muted-foreground">
+                  {currentCall.timestamp ? format(currentCall.timestamp.toDate(), 'HH:mm:ss') : ''}
+                </p>
               </div>
             </>
           ) : (
@@ -226,6 +230,9 @@ export function TvDisplay() {
                         {call.professionalName}
                         </p>
                     )}
+                    <p className="text-xs text-muted-foreground">
+                        {call.timestamp ? format(call.timestamp.toDate(), 'HH:mm:ss') : ''}
+                    </p>
                   </div>
                   <span className="flex-shrink-0 rounded-md bg-primary/20 px-3 py-1 text-base font-bold text-primary">
                     SALA {call.roomNumber}
