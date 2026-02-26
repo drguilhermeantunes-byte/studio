@@ -45,7 +45,7 @@ const professionals = [
   },
   {
     role: 'Consulta Enfermagem',
-    names: ['Cintia', 'Jason', 'Karoline'],
+    names: ['Cintia', 'Jason (Enfermagem)', 'Karoline'],
   },
   {
     role: 'Consulta Odontologia',
@@ -65,7 +65,7 @@ const professionals = [
   },
   {
     role: 'Administrativo',
-    names: ['Jason', 'Sarah'],
+    names: ['Jason (Administrativo)', 'Sarah'],
   },
 ];
 
