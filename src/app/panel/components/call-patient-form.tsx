@@ -1,8 +1,5 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import {
   Form,
   FormControl,
@@ -22,11 +19,9 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
 import { BellRing, Loader2 } from 'lucide-react';
-import { useState } from 'react';
-import { useFirestore } from '@/firebase';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { type UseFormReturn } from 'react-hook-form';
+import { z } from 'zod';
 
 const formSchema = z.object({
   patientName: z.string().min(3, {
@@ -38,15 +33,11 @@ const formSchema = z.object({
   }),
 });
 
+
 const professionals = [
   {
     role: 'Consulta Médica',
-    names: [
-      'Doutora Bruna',
-      'Doutor Guilherme',
-      'Doutora Maria Jose',
-      'Médico (Outro)',
-    ],
+    names: ['Doutora Bruna', 'Doutor Guilherme', 'Doutora Maria Jose', 'Médico (Outro)'],
   },
   {
     role: 'Consulta Ginecologia',
@@ -70,15 +61,7 @@ const professionals = [
   },
   {
     role: 'ACS',
-    names: [
-      'Alessandra',
-      'Bruno',
-      'Diogo',
-      'Gabriela',
-      'Laudeli',
-      'Jackeline',
-      'Victor Hugo',
-    ],
+    names: ['Alessandra', 'Bruno', 'Diogo', 'Gabriela', 'Laudeli', 'Jackeline', 'Victor Hugo'],
   },
   {
     role: 'Administrativo',
@@ -106,50 +89,13 @@ const rooms = [
   'Telemedicina',
 ];
 
-export function CallPatientForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
-  const firestore = useFirestore();
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      patientName: '',
-      roomNumber: undefined,
-      professionalName: undefined,
-    },
-  });
+interface CallPatientFormProps {
+    form: UseFormReturn<z.infer<typeof formSchema>>;
+    onSubmit: (values: z.infer<typeof formSchema>) => void;
+    isSubmitting: boolean;
+}
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true);
-    try {
-      const callsCollection = collection(firestore, 'calls');
-      await addDoc(callsCollection, {
-        patientName: values.patientName,
-        roomNumber: values.roomNumber,
-        professionalName: values.professionalName || '',
-        timestamp: serverTimestamp(),
-      });
-
-      toast({
-        title: 'Sucesso!',
-        description: `Paciente ${values.patientName} chamado para a sala ${values.roomNumber}.`,
-        variant: 'default',
-      });
-      form.reset();
-      form.setFocus('patientName');
-    } catch (error) {
-      console.error('Error adding document: ', error);
-      toast({
-        title: 'Erro!',
-        description:
-          'Não foi possível realizar a chamada. Verifique sua conexão com a internet.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
+export function CallPatientForm({ form, onSubmit, isSubmitting }: CallPatientFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
