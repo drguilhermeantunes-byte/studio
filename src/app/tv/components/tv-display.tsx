@@ -28,6 +28,7 @@ import {
 import { RotateCcw, Volume2, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { capitalizeName } from '@/lib/utils';
 
 export function TvDisplay() {
   const [lastAnnouncedId, setLastAnnouncedId] = useState<string | null>(null);
@@ -58,9 +59,10 @@ export function TvDisplay() {
     if (currentCall && currentCall.id !== lastAnnouncedId) {
       setLastAnnouncedId(currentCall.id);
 
-      let announcementText = `Olá, ${currentCall.patientName}, por favor, dirija-se à sala ${currentCall.roomNumber}.`;
+      const formattedPatientName = capitalizeName(currentCall.patientName);
+      let announcementText = `Olá, ${formattedPatientName}, por favor, dirija-se à sala ${currentCall.roomNumber}.`;
       if (currentCall.professionalName) {
-        announcementText = `Olá, ${currentCall.patientName}, atendimento com ${currentCall.professionalName}, na sala ${currentCall.roomNumber}.`;
+        announcementText = `Olá, ${formattedPatientName}, atendimento com ${currentCall.professionalName}, na sala ${currentCall.roomNumber}.`;
       }
 
 
@@ -167,8 +169,8 @@ export function TvDisplay() {
               <h2 className="text-4xl font-semibold uppercase tracking-wider text-muted-foreground md:text-5xl">
                 Paciente
               </h2>
-              <h1 className="mt-4 text-6xl font-black leading-none tracking-tight text-primary md:text-7xl lg:text-8xl">
-                {currentCall.patientName}
+              <h1 className="mt-4 text-5xl font-black leading-none tracking-tight text-primary md:text-7xl lg:text-8xl">
+                {capitalizeName(currentCall.patientName)}
               </h1>
                {currentCall.professionalName && (
                 <p className="mt-6 text-3xl font-medium text-foreground md:text-4xl lg:text-5xl">
@@ -224,7 +226,7 @@ export function TvDisplay() {
                   className="flex items-center justify-between gap-x-4 rounded-lg bg-background p-3 shadow-sm"
                 >
                   <div className="flex-grow">
-                    <p className="text-xl font-semibold">{call.patientName}</p>
+                    <p className="text-xl font-semibold">{capitalizeName(call.patientName)}</p>
                     {call.professionalName && (
                         <p className="text-sm text-muted-foreground">
                         {call.professionalName}

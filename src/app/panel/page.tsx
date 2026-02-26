@@ -31,6 +31,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { useMemo, useState } from 'react';
+import { capitalizeName } from '@/lib/utils';
 
 const formSchema = z.object({
   patientName: z.string().min(3, {
@@ -70,14 +71,15 @@ export default function PanelPage() {
     });
 
     const handleCallSelect = (call: Call) => {
+        const formattedName = capitalizeName(call.patientName);
         form.reset({
-            patientName: call.patientName,
+            patientName: formattedName,
             professionalName: call.professionalName || '',
             roomNumber: call.roomNumber,
         });
         toast({
             title: 'Formulário preenchido',
-            description: `Dados de ${call.patientName} carregados para nova chamada.`,
+            description: `Dados de ${formattedName} carregados para nova chamada.`,
         });
     };
 
@@ -88,7 +90,7 @@ export default function PanelPage() {
             await deleteDoc(callDocRef);
             toast({
                 title: 'Chamada Deletada',
-                description: `A chamada de ${callToDelete.patientName} foi removida.`,
+                description: `A chamada de ${capitalizeName(callToDelete.patientName)} foi removida.`,
             });
         } catch (error) {
             console.error('Error deleting document: ', error);
@@ -104,11 +106,12 @@ export default function PanelPage() {
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsSubmitting(true);
+        const formattedPatientName = capitalizeName(values.patientName);
         try {
           if (!firestore) throw new Error("Firestore not available");
           const callsCollection = collection(firestore, 'calls');
           await addDoc(callsCollection, {
-            patientName: values.patientName,
+            patientName: formattedPatientName,
             roomNumber: values.roomNumber,
             professionalName: values.professionalName || '',
             timestamp: serverTimestamp(),
@@ -116,7 +119,7 @@ export default function PanelPage() {
     
           toast({
             title: 'Sucesso!',
-            description: `Paciente ${values.patientName} chamado para a sala ${values.roomNumber}.`,
+            description: `Paciente ${formattedPatientName} chamado para a sala ${values.roomNumber}.`,
             variant: 'default',
           });
           form.reset();
@@ -192,7 +195,7 @@ export default function PanelPage() {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Esta ação não pode ser desfeita. A chamada para <span className="font-semibold">{callToDelete?.patientName}</span> será permanentemente deletada.
+                            Esta ação não pode ser desfeita. A chamada para <span className="font-semibold">{capitalizeName(callToDelete?.patientName)}</span> será permanentemente deletada.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

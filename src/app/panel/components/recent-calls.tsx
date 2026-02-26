@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { Call } from "@/lib/types";
 import { Repeat, Trash2 } from "lucide-react";
 import { format } from 'date-fns';
+import { capitalizeName } from "@/lib/utils";
 
 interface RecentCallsProps {
     calls: Call[] | null;
@@ -39,7 +40,7 @@ export function RecentCalls({ calls, loading, onCallSelect, onDeleteCall }: Rece
                 {calls.map((call) => (
                     <div key={call.id} className="flex items-center justify-between gap-4 rounded-lg bg-secondary/50 p-3">
                         <div className="flex-grow overflow-hidden">
-                            <p className="truncate font-semibold text-secondary-foreground">{call.patientName}</p>
+                            <p className="truncate font-semibold text-secondary-foreground">{capitalizeName(call.patientName)}</p>
                             <p className="truncate text-sm text-muted-foreground">
                                 Sala {call.roomNumber}
                                 {call.professionalName && ` - ${call.professionalName}`}
@@ -54,8 +55,8 @@ export function RecentCalls({ calls, loading, onCallSelect, onDeleteCall }: Rece
                                 size="icon"
                                 className="flex-shrink-0"
                                 onClick={() => onCallSelect(call)}
-                                aria-label={`Re-chamar ${call.patientName}`}
-                                title={`Re-chamar ${call.patientName}`}
+                                aria-label={`Re-chamar ${capitalizeName(call.patientName)}`}
+                                title={`Re-chamar ${capitalizeName(call.patientName)}`}
                             >
                                 <Repeat className="h-5 w-5" />
                             </Button>
@@ -64,8 +65,8 @@ export function RecentCalls({ calls, loading, onCallSelect, onDeleteCall }: Rece
                                 size="icon"
                                 className="flex-shrink-0 text-destructive hover:text-destructive"
                                 onClick={() => onDeleteCall(call)}
-                                aria-label={`Deletar chamada de ${call.patientName}`}
-                                title={`Deletar chamada de ${call.patientName}`}
+                                aria-label={`Deletar chamada de ${capitalizeName(call.patientName)}`}
+                                title={`Deletar chamada de ${capitalizeName(call.patientName)}`}
                             >
                                 <Trash2 className="h-5 w-5" />
                             </Button>
