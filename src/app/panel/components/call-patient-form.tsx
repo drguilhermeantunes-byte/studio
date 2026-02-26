@@ -37,7 +37,7 @@ const formSchema = z.object({
 const professionals = [
   {
     role: 'Consulta Médica',
-    names: ['Doutora Bruna', 'Doutor Guilherme', 'Doutora Maria Jose', 'Médico (Outro)'],
+    names: ['Doutora Bruna', 'Doutor Guilherme', 'Doutora Maria José', 'Médico (Outro)'],
   },
   {
     role: 'Consulta Ginecologia',
