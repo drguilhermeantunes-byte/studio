@@ -61,7 +61,7 @@ const professionals = [
   },
   {
     role: 'ACS',
-    names: ['Alessandra', 'Bruno', 'Diogo', 'Gabriela', 'Laudeli', 'Jackeline', 'Victor Hugo'],
+    names: ['Alessandra', 'Bruno', 'Diogo',  'Gabriela', 'Laudeli', 'Jackeline', 'Victor Hugo', 'Taiz'],
   },
   {
     role: 'Administrativo',
