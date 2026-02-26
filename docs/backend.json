@@ -23,7 +23,7 @@
           "description": "The time of the call."
         }
       },
-      "required": ["patientName", "roomNumber", "timestamp", "professionalName"]
+      "required": ["patientName", "roomNumber", "timestamp"]
     }
   },
   "auth": {

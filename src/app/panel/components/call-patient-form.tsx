@@ -32,9 +32,7 @@ const formSchema = z.object({
   patientName: z.string().min(3, {
     message: 'O nome do paciente deve ter pelo menos 3 caracteres.',
   }),
-  professionalName: z.string({
-    required_error: 'Por favor, selecione um profissional.',
-  }),
+  professionalName: z.string().optional(),
   roomNumber: z.string({
     required_error: 'Por favor, selecione uma sala.',
   }),
@@ -42,34 +40,70 @@ const formSchema = z.object({
 
 const professionals = [
   {
-    role: 'Médicos',
-    names: ['Guilherme', 'Bruna', 'Maria Jose'],
+    role: 'Consulta Médica',
+    names: [
+      'Doutora Bruna',
+      'Doutor Guilherme',
+      'Doutora Maria Jose',
+      'Médico (Outro)',
+    ],
   },
   {
-    role: 'Enfermeiros',
-    names: ['Karoline', 'Jason'],
+    role: 'Consulta Ginecologia',
+    names: ['Doutora Anselma'],
+  },
+  {
+    role: 'Consulta Enfermagem',
+    names: ['Cintia', 'Jason', 'Karoline'],
+  },
+  {
+    role: 'Consulta Odontologia',
+    names: ['Doutora Karina'],
+  },
+  {
+    role: 'Consulta Nutricionista',
+    names: ['Nataly'],
   },
   {
     role: 'Técnicos de Enfermagem',
-    names: ['Eva', 'Vera Lucia', 'Thiago', 'Sarah'],
+    names: ['Eva', 'Vera Lucia', 'Thiago', 'Catia', 'Beatriz'],
   },
   {
     role: 'ACS',
-    names: ['Alessandra', 'Laudeli', 'Diogo', 'Bruno', 'Gabriela', 'Jackeline'],
+    names: [
+      'Alessandra',
+      'Bruno',
+      'Diogo',
+      'Gabriela',
+      'Laudeli',
+      'Jackeline',
+      'Victor Hugo',
+    ],
+  },
+  {
+    role: 'Administrativo',
+    names: ['Jason', 'Sarah'],
   },
 ];
 
 const rooms = [
-  'Consultório',
-  'Exames',
-  'Vacinação',
+  '1 Consultório',
+  '2 Consultório',
+  '3 Consultório',
+  '4 Consultório',
+  '5 Consultório',
+  '6 Vacinação',
+  '7 Triagem',
+  '10 Consultório',
+  '8 Odontologia',
+  '9 Curativo',
+  '9 Medicação',
   'Pós-consulta',
   'Recepção',
   'Farmácia',
   'Medicação',
   'Ginecologia',
   'Telemedicina',
-  '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15'
 ];
 
 export function CallPatientForm() {
@@ -92,7 +126,7 @@ export function CallPatientForm() {
       await addDoc(callsCollection, {
         patientName: values.patientName,
         roomNumber: values.roomNumber,
-        professionalName: values.professionalName,
+        professionalName: values.professionalName || '',
         timestamp: serverTimestamp(),
       });
 
@@ -137,8 +171,8 @@ export function CallPatientForm() {
           name="professionalName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Profissional</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormLabel>Profissional (Opcional)</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value ?? ''}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o profissional" />
@@ -167,18 +201,18 @@ export function CallPatientForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Sala</FormLabel>
-               <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione a sala" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                    {rooms.map((room) => (
-                        <SelectItem key={room} value={room}>
-                          {room.startsWith('P') ? 'Pós-consulta' : room}
-                        </SelectItem>
-                    ))}
+                  {rooms.map((room, index) => (
+                    <SelectItem key={`${room}-${index}`} value={room}>
+                      {room}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />

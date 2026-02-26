@@ -17,7 +17,6 @@ import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -31,6 +30,7 @@ import { useToast } from '@/hooks/use-toast';
 export function TvDisplay() {
   const [lastAnnouncedId, setLastAnnouncedId] = useState<string | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [audioReady, setAudioReady] = useState(false);
   const { toast } = useToast();
   const firestore = useFirestore();
 
@@ -49,14 +49,18 @@ export function TvDisplay() {
   const callHistory = calls && calls.length > 1 ? calls.slice(1) : [];
 
   useEffect(() => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) {
+    if (typeof window === 'undefined' || !window.speechSynthesis || !audioReady) {
       return;
     }
 
     if (currentCall && currentCall.id !== lastAnnouncedId) {
       setLastAnnouncedId(currentCall.id);
 
-      const announcementText = `Olá, ${currentCall.patientName}, atendimento com ${currentCall.professionalName} na sala ${currentCall.roomNumber}.`;
+      let announcementText = `Olá, ${currentCall.patientName}, por favor, dirija-se à sala ${currentCall.roomNumber}.`;
+      if (currentCall.professionalName) {
+        announcementText = `Olá, ${currentCall.patientName}, atendimento com ${currentCall.professionalName}, na sala ${currentCall.roomNumber}.`;
+      }
+
 
       try {
         const utterance = new SpeechSynthesisUtterance(announcementText);
@@ -82,7 +86,21 @@ export function TvDisplay() {
         });
       }
     }
-  }, [currentCall, lastAnnouncedId, toast]);
+  }, [currentCall, lastAnnouncedId, toast, audioReady]);
+  
+  const handleEnableAudio = () => {
+    // This user interaction is necessary for browsers that block autoplay
+    const synth = window.speechSynthesis;
+    // Speak an empty utterance to "unlock" the audio context
+    const utterance = new SpeechSynthesisUtterance('');
+    synth.speak(utterance);
+    setAudioReady(true);
+     toast({
+        title: 'Áudio Ativado',
+        description: 'Os anúncios por voz estão prontos para tocar.',
+    });
+  };
+
 
   const handleResetHistory = async () => {
     try {
@@ -120,38 +138,59 @@ export function TvDisplay() {
 
   return (
     <div className="grid h-screen w-screen grid-rows-1 bg-background text-foreground lg:grid-cols-[1fr_400px]">
+       {!audioReady && (
+        <AlertDialog open={!audioReady}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-center">Ativar Anúncios por Voz</AlertDialogTitle>
+              <AlertDialogDescription className="text-center">
+                Para ouvir as chamadas, o navegador precisa da sua permissão. Clique no botão abaixo para ativar o som.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction onClick={handleEnableAudio} className="w-full">
+                <Volume2 className="mr-2 h-4 w-4" />
+                Ativar Áudio
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+
       {/* Main Call Section */}
-      <section className="flex flex-col items-center justify-center p-8">
+      <section className="flex flex-col items-center justify-center p-4 md:p-8">
         <div className="flex w-full flex-col items-center justify-center text-center">
           {currentCall ? (
             <>
-              <h2 className="text-5xl font-semibold uppercase tracking-wider text-muted-foreground">
+              <h2 className="text-4xl font-semibold uppercase tracking-wider text-muted-foreground md:text-5xl">
                 Paciente
               </h2>
-              <h1 className="mt-4 text-[8rem] font-black leading-none tracking-tight text-primary lg:text-[10rem]">
+              <h1 className="mt-4 text-7xl font-black leading-none tracking-tight text-primary md:text-8xl lg:text-9xl">
                 {currentCall.patientName}
               </h1>
-              <p className="mt-6 text-4xl font-medium text-foreground lg:text-5xl">
-                {currentCall.professionalName}
-              </p>
+               {currentCall.professionalName && (
+                <p className="mt-6 text-3xl font-medium text-foreground md:text-4xl lg:text-5xl">
+                  {currentCall.professionalName}
+                </p>
+              )}
               <div className="mt-12 flex flex-col items-center justify-center gap-4 text-foreground">
                 <div className="flex items-center gap-4">
                   {isSpeaking ? (
-                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                    <Loader2 className="h-10 w-10 animate-spin text-primary md:h-12 md:w-12" />
                   ) : (
-                    <Volume2 className="h-12 w-12 text-primary" />
+                    <Volume2 className="h-10 w-10 text-primary md:h-12 md:w-12" />
                   )}
-                  <p className="text-6xl font-bold uppercase">Sala</p>
+                  <p className="text-5xl font-bold uppercase md:text-6xl">Sala</p>
                 </div>
-                <div className="mt-2 rounded-2xl bg-primary px-16 py-4 shadow-lg">
-                  <p className="font-mono text-9xl font-bold text-primary-foreground">
+                <div className="mt-2 rounded-2xl bg-primary px-12 py-3 shadow-lg md:px-16 md:py-4">
+                  <p className="font-mono text-8xl font-bold text-primary-foreground md:text-9xl">
                     {currentCall.roomNumber}
                   </p>
                 </div>
               </div>
             </>
           ) : (
-            <div className="text-center text-5xl font-semibold text-muted-foreground">
+            <div className="text-center text-4xl font-semibold text-muted-foreground md:text-5xl">
               Aguardando chamada...
             </div>
           )}
@@ -181,9 +220,11 @@ export function TvDisplay() {
                 >
                   <div className="flex-grow">
                     <p className="text-xl font-semibold">{call.patientName}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {call.professionalName}
-                    </p>
+                    {call.professionalName && (
+                        <p className="text-sm text-muted-foreground">
+                        {call.professionalName}
+                        </p>
+                    )}
                   </div>
                   <span className="flex-shrink-0 rounded-md bg-primary/20 px-3 py-1 text-base font-bold text-primary">
                     SALA {call.roomNumber}
