@@ -49,7 +49,7 @@ const professionals = [
   },
   {
     role: 'Consulta Odontologia',
-    names: ['Doutora Karina'],
+    names: ['Doutora Karina', 'Doutor Rogerio'],
   },
   {
     role: 'Consulta Nutricionista',
